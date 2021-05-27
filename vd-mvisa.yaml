@@ -7,7 +7,7 @@ info:
     \ smart or feature phones."
   version: 1.0.0
 servers:
-- url: /
+- url: sandbox.api.visa.com
 tags:
 - name: MerchantPushPayments POST
   description: "MerchantPushPayments is used for payment to a merchant for goods or\
