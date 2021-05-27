@@ -5,6 +5,7 @@ info:
     \ mobile phones. mVisa enables a range of payment use cases and is technology\
     \ agnostic-leveraging evolving POS environment such as QR codes and works on both\
     \ smart or feature phones."
+  version: 1.0.0
 servers:
 - url: /
 tags:
