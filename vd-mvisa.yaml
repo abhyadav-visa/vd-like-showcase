@@ -1,0 +1,428 @@
+openapi: 3.0.1
+info:
+  title: mVisa API
+  description: "The mVisa is a simple, secure and fast way to pay and be paid using\
+    \ mobile phones. mVisa enables a range of payment use cases and is technology\
+    \ agnostic-leveraging evolving POS environment such as QR codes and works on both\
+    \ smart or feature phones."
+servers:
+- url: /
+tags:
+- name: MerchantPushPayments POST
+  description: "MerchantPushPayments is used for payment to a merchant for goods or\
+    \ services purchased, either face-to-face or remote ecommerce payment. This API\
+    \ is invoked in the following sequence:&lt;br&gt;1.The consumer connects the account\
+    \ through the mobile device, provides payment instructions and authenticates themselves.\
+    \ The merchant information is captured by the consumers mobile from the merchant\
+    \ information display which can be through key entry, QR code, NFC or other means.\
+    \ The payment instructions include merchant ID (which is used to identify the\
+    \ merchant PAN), the amount to be paid and optionally a payment reference such\
+    \ as an invoice or bill number.&lt;br&gt;2. Upon receiving the payment instructions,\
+    \ the consumers issuer invokes MerchantPushPayments POST operation to push payment\
+    \ instructions to the merchants account.&lt;br&gt;3. The merchant acquirer processes\
+    \ the Visa message, creates a record of merchant payment and reverts back with\
+    \ a response message containing the MerchantPushPayments response attributes.&lt;br&gt;4.\
+    \ On completion, both the consumer and the merchant receive confirmation or decline\
+    \ notification.&lt;br&gt;&lt;b&gt;Note:&lt;/b&gt; If the POST call times out,\
+    \ the resource will return a statusIdentifier which can be used in the MerchantPushPayments\
+    \ Transactions GET operation as the statusIdentifier in the URL."
+  x-tag-expanded: "true"
+paths:
+  /visadirect/mvisa/v1/merchantpushpayments:
+    post:
+      tags:
+      - MerchantPushPayments POST
+      summary: MerchantPushPayments POST
+      description: Create Merchant Push Payment
+      operationId: MerchantPushPayments POST
+      requestBody:
+        content:
+          v1 (json):
+            schema:
+              type: object
+              properties:
+                amount:
+                  maxLength: 12
+                  type: string
+                  description: Transaction amount in merchant currency.
+                senderName:
+                  maxLength: 30
+                  minLength: 1
+                  type: string
+                  description: "Populate with consumer name If consumer name is greater\
+                    \ than 30 characters, use first 30 characters. The name must be\
+                    \ populated using the Roman i.e., English character set."
+                secondaryId:
+                  maxLength: 28
+                  type: string
+                  description: <b>Conditional.</b> If the merchant information display
+                    contains <b>Additional Data - Value 2</b> then originator should
+                    populate this fields.  See the example of the field purchaseIdentifier
+                    on how to extract this field value from QR.
+                acquiringBin:
+                  maxLength: 11
+                  minLength: 6
+                  type: string
+                  description: BIN number identifies the originator of merchant payment
+                    transaction.
+                cardAcceptor:
+                  required:
+                  - idCode
+                  - name
+                  type: object
+                  properties:
+                    name:
+                      maxLength: 25
+                      minLength: 1
+                      type: string
+                      description: Originator must populate this field with value
+                        captured from merchant information display.  If manual entered
+                        transaction then populate default value of 'mVisa merchant'.
+                    idCode:
+                      maxLength: 15
+                      minLength: 1
+                      type: string
+                      description: Originator can populate the field with any system
+                        generated reference number internal to originating client.
+                    address:
+                      required:
+                      - city
+                      - country
+                      type: object
+                      properties:
+                        city:
+                          maxLength: 13
+                          minLength: 1
+                          type: string
+                          description: Originator must populate this field with value
+                            captured from merchant information display.  If manual
+                            entered transaction then populate default value of 'mVisa
+                            payment'.
+                        country:
+                          maxLength: 3
+                          minLength: 2
+                          type: string
+                          description: Must include the 2-character alpha country
+                            code of the merchant captured from the merchant information
+                            display
+                      description: Address description.
+                  description: ""
+                senderReference:
+                  maxLength: 16
+                  type: string
+                  description: A reference number unique to the merchant. Field can
+                    be left blank.
+                otherPhoneNumber:
+                  maxLength: 16
+                  minLength: 1
+                  type: string
+                  description: "<b>Conditional.</b> When present, this field contains\
+                    \ the sender's phone number. This field is applicable only for\
+                    \ merchant payment transaction.  Originator should populate the\
+                    \ consumer mobile number if captured on the mobile app for this\
+                    \ transaction. Data should not exceed 16 alphanumeric characters."
+                otherEmailAddress:
+                  maxLength: 99
+                  minLength: 1
+                  type: string
+                  description: "<b>Conditional.</b> When present, this field contains\
+                    \ the sender's email address. This field is applicable only for\
+                    \ merchant payment transaction. Originator should populate the\
+                    \ consumer email address if captured on the mobile app for this\
+                    \ transaction. Data should not exceed 99 alphanumeric characters."
+                transactionFeeAmt:
+                  maxLength: 8
+                  type: string
+                  description: "<b>Conditional.</b> In certain case the merchant display\
+                    \ information could contain convenience fee applicable to the\
+                    \ transaction. Originators are required to populate convenience\
+                    \ fee amount in this field, if presented by merchant."
+                purchaseIdentifier:
+                  type: object
+                  properties:
+                    type:
+                      maxLength: 1
+                      minLength: 1
+                      type: string
+                      description: Populate <b>0</b>
+                    referenceNumber:
+                      maxLength: 25
+                      type: string
+                      description: Populate this field with the Additional Data -
+                        Value 1 as defined in merchant data specification with reference
+                        to EMVCo QR specification (Merchant-Presented Mode).<br>Below
+                        is an example of Additional Data Field Template '62' having
+                        a value of '62150103XYZ05049999'<br><table border=1><tr><td
+                        width='20%'>ID</td><td width='20%'>Descripton</td><td width='20%'>Value</td><td
+                        width='40%'>Comments</td></tr><tr><td>'62'-'01'</td><td>Bill
+                        Number</td><td>XYZ</td><td>Additional Data - Value 1</td></tr><tr><td>'62'-'05'</td><td>Reference
+                        Label</td><td>9999</td><td>Additional Data - Value 2</td></tr></table>
+                  description: ""
+                acquirerCountryCode:
+                  maxLength: 3
+                  minLength: 3
+                  type: string
+                  description: "Country of the originator BIN. Use a 3-digit numeric\
+                    \ country code for the country. Refer to [ISO Codes](/request_response_codes#iso_country_codes)."
+                senderAccountNumber:
+                  maxLength: 34
+                  type: string
+                  description: "Populate with consumer PAN. If the consumer PAN is\
+                    \ not populated or is not valid, VisaNet will reject the transaction\
+                    \ with reject code 0494 (field or data missing or invalid)"
+                merchantCategoryCode:
+                  maxLength: 4
+                  minLength: 4
+                  type: string
+                  description: Numeric only. Originator should populate value captured
+                    from merchant displayed or a default value of 6012 for transaction
+                    initiated with manual entry of merchant ID.
+                businessApplicationId:
+                  maxLength: 2
+                  minLength: 2
+                  type: string
+                  description: "Use MP for merchant payment. This field is populated\
+                    \ with business application identifier for the transaction. Refer\
+                    \ to [businessApplicationId](/request_response_codes#businessApplicationId)\
+                    \ codes"
+                systemsTraceAuditNumber:
+                  maxLength: 6
+                  minLength: 6
+                  type: string
+                  description: Numeric only. It is a key data element used to match
+                    a response to its request or to match a message to others for
+                    a given transaction. The value assigned to the original request
+                    should appear in all subsequent messages for that transaction.
+                transactionCurrencyCode:
+                  maxLength: 3
+                  minLength: 3
+                  type: string
+                  description: "The code in this field must always reflect the currency\
+                    \ associated to the amount in field amount. Use a 3-digit numeric\
+                    \ currency code for currency. Refer to [ISO Codes](/request_response_codes#currency_codes)."
+                localTransactionDateTime:
+                  type: string
+                  description: "The date and time of the transaction takes place,\
+                    \ expressed in the local date and time of the originator."
+                  format: date-time
+                retrievalReferenceNumber:
+                  maxLength: 12
+                  minLength: 12
+                  type: string
+                  description: "Numeric only. Key data element for matching a message\
+                    \ to others within a given transaction set. The same number appears\
+                    \ in all related messages: response, advice, reversal, chargeback,\
+                    \ chargeback reversal, or representment. It is recommended that\
+                    \ the client populate ydddhhnnnnnn value in this field."
+                settlementServiceIndicator:
+                  type: integer
+                  description: "This flag enables the originator to request for a\
+                    \ particular settlement service to be used for settling the transaction.\
+                    \ <br><br> Valid values are: <br>0 - International Settlement<br>9\
+                    \ - VIP to decide<br>8 - National Settlement<br><br><b>Note:</b>\
+                    \ The default value is 9. This field is only relevant for specific\
+                    \ countries where the acquirer has to select 8 in order to settle\
+                    \ in the national net settlement service. "
+                recipientPrimaryAccountNumber:
+                  maxLength: 19
+                  minLength: 13
+                  type: string
+                  description: Merchant PAN. 16-digit PAN created from the merchant
+                    ID as captured by the consumer from the merchant information display.
+        required: false
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  MerchantPushPaymentResponse:
+                    type: object
+                    properties:
+                      actionCode:
+                        maxLength: 2
+                        minLength: 2
+                        type: string
+                        description: "Contains a code that defines the response to\
+                          \ a request. Refer to [actionCode](/request_response_codes#actionCode)"
+                      approvalCode:
+                        maxLength: 6
+                        minLength: 6
+                        type: string
+                        description: "<b>Conditional.</b> Contains the authorization\
+                          \ code provided by the recipient when a transaction is approved.\
+                          \ Visa recommends that recipients maintain uniqueness of\
+                          \ this code for a given merchant PAN, however Visa would\
+                          \ not maintain any checks for uniqueness."
+                      cardAcceptor:
+                        required:
+                        - address
+                        - name
+                        type: object
+                        properties:
+                          name:
+                            maxLength: 25
+                            minLength: 1
+                            type: string
+                            description: Originator can populate this field with value
+                              captured from merchant information display.  If manual
+                              entered transaction then populate default value of 'mVisa
+                              merchant'.
+                          idCode:
+                            maxLength: 15
+                            minLength: 1
+                            type: string
+                            description: Originator can populate the field with any
+                              system generated reference number internal to originating
+                              client.
+                          address:
+                            required:
+                            - city
+                            - country
+                            type: object
+                            properties:
+                              city:
+                                maxLength: 13
+                                minLength: 1
+                                type: string
+                                description: Originator can populate this field with
+                                  value captured from merchant information display.  If
+                                  manual entered transaction then populate default
+                                  value of 'mVisa payment'.
+                              country:
+                                maxLength: 3
+                                minLength: 2
+                                type: string
+                                description: Originator can include the 2-character
+                                  alpha country code of the merchant captured from
+                                  the merchant information display
+                            description: Address description.
+                        description: "It is optional for recipient to send card acceptor\
+                          \ field in the response. However, if it is in the response,\
+                          \ all merchant name, city and country need to be there."
+                      responseCode:
+                        maxLength: 1
+                        minLength: 1
+                        type: string
+                        description: It is added by VisaNet and contains the response
+                          source/reason code that identifies the source of the actionCode
+                          response decision.
+                      settlementFlags:
+                        required:
+                        - settlementResponsibilityFlag
+                        type: object
+                        properties:
+                          givUpdatedFlag:
+                            type: string
+                            description: Possible values are true or false
+                          settlementServiceFlag:
+                            type: string
+                            description: "Possible values are: <br>0 - International\
+                              \ Settlement<br>9 - VIP to decide<br>8 - National Settlement<br>"
+                          givPreviouslyUpdatedFlag:
+                            type: string
+                            description: Possible values are true or false
+                          settlementResponsibilityFlag:
+                            type: string
+                            description: Possible values are true or false
+                        description: ""
+                      statusIdentifier:
+                        type: string
+                        description: Required when API response times out.
+                      memberSuppliedIRF:
+                        maxLength: 13
+                        minLength: 13
+                        type: string
+                        description: "Optional field which contains interchange fee\
+                          \ provided by recipient and its only relevant for LAC regional\
+                          \ markets. List of Countries supported: <br>1. Costa Rica\
+                          \ <br>2. Dominican Republican <br>3. Venezuela <br>4. Guatemala"
+                      originalActionCode:
+                        maxLength: 2
+                        minLength: 2
+                        type: string
+                        description: "The action code of the original transaction\
+                          \ request <br/> Refer to <a href='url'>actionCode</a><br/>\
+                          \ Note: This field is only present, when the request is\
+                          \ identified as a duplicate."
+                      purchaseIdentifier:
+                        type: object
+                        properties:
+                          type:
+                            maxLength: 1
+                            minLength: 1
+                            type: string
+                            description: Populate <b>0</b>
+                          referenceNumber:
+                            maxLength: 25
+                            type: string
+                            description: Populate this field with the Additional Data
+                              - Value 1 as defined in merchant data specification
+                              with reference to EMVCo QR specification (Merchant-Presented
+                              Mode).<br>Below is an example of Additional Data Field
+                              Template '62' having a value of '62150103XYZ05049999'<br><table
+                              border=1><tr><td width='20%'>ID</td><td width='20%'>Descripton</td><td
+                              width='20%'>Value</td><td width='40%'>Comments</td></tr><tr><td>'62'-'01'</td><td>Bill
+                              Number</td><td>XYZ</td><td>Additional Data - Value 1</td></tr><tr><td>'62'-'05'</td><td>Reference
+                              Label</td><td>9999</td><td>Additional Data - Value 2</td></tr></table>
+                        description: ""
+                      feeProgramIndicator:
+                        maxLength: 3
+                        minLength: 3
+                        type: string
+                        description: Optional field which may be populated by recipient
+                          where applicable.
+                      merchantCategoryCode:
+                        maxLength: 4
+                        minLength: 4
+                        type: string
+                        description: Numeric only. Recipient should populate the MCC
+                          of the merchant in the response message.
+                      transmissionDateTime:
+                        type: string
+                        description: The value in response must match the value in
+                          the request.
+                        format: date-time
+                      transactionIdentifier:
+                        maxLength: 15
+                        minLength: 15
+                        type: string
+                        description: "It is added by VisaNet. It contains a right-justified,\
+                          \ VisaNet generated Transaction Identifier (TID) that is\
+                          \ unique for each request. The identifier links original\
+                          \ messages to subsequent messages, such as those for exception\
+                          \ item processing and clearing record."
+                      retrievalReferenceNumber:
+                        maxLength: 12
+                        minLength: 12
+                        type: string
+                        description: Numeric only. Key data element for matching a
+                          message to others within a given transaction set. Value
+                          will be the same as what has been provided in the request.
+                      merchantVerificationValue:
+                        maxLength: 10
+                        minLength: 10
+                        type: string
+                        description: Recipient are expected to populate the Merchant
+                          Verification Value used to identify merchants that participate
+                          in a variety of programs in this field The valid values
+                          are 0-9 and A-F. These values are hexadecimal.
+                    description: Merchant Push Payment Response
+              examples:
+                code_10:
+                  summary: code 10
+                  value:
+                    status: 0
+                    code: "10"
+                    message: this is a response code of 10
+                code_5:
+                  summary: code 5
+                  value:
+                    status: 0
+                    code: "5"
+                    message: this is a response code of 5
+      x-codegen-request-body-name: MerchantPushPaymentPayload
+components: {}
+x-original-swagger-version: "2.0"
