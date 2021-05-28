@@ -209,6 +209,24 @@ paths:
                     limit: "10"
                     fields: actionCode
                     merchantPAN: "1111111111111111"
+              Successful:
+                summary: Successful
+                value:
+                  samplePayload:
+                    consumerPAN: "1234567890"
+                    offset: "5"
+                    limit: "10"
+                    fields: actionCode
+                    merchantPAN: "78759438291"
+              Unsuccessful:
+                summary: Unsuccessful
+                value:
+                  samplePayload:
+                    consumerPAN: "Uh-Oh"
+                    offset: "-1"
+                    limit: "-1"
+                    fields: actionCode
+                    merchantPAN: "Invalid"
         required: true
       responses:
         "201":
